@@ -32,13 +32,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import type { Staff } from '@/types/staff'
 import type { DutyStat } from '@/types/stats'
 import { listDutyStats } from '@/api/statsApi'
 import { log, errorMessage } from '@/utils/logger'
 
-const props = defineProps<{ staff: Staff[] }>()
+const props = defineProps<{ staff: Staff[]; refreshKey?: number }>()
 
 const stats = ref<DutyStat[]>([])
 const loading = ref(false)
@@ -114,5 +114,15 @@ async function refresh() {
 }
 
 onMounted(refresh)
-</script>
 
+// Re-fetch stats when the parent signals changes (e.g., schedule length)
+watch(
+  () => props.refreshKey,
+  () => {
+    // Avoid double call on initial mount if undefined
+    if (typeof props.refreshKey !== 'undefined') {
+      refresh()
+    }
+  }
+)
+</script>

@@ -1,31 +1,24 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import StaffForm from './components/StaffForm.vue'
 import StaffTable from './components/StaffTable.vue'
 import ScheduleForm from './components/ScheduleForm.vue'
 import ScheduleTable from './components/ScheduleTable.vue'
 import StatsPage from './pages/StatsPage.vue'
-import { listStaff, createStaff, deleteStaff } from './api/staffApi'
-import { listSchedule, createSchedule, deleteScheduleByDate } from './api/scheduleApi'
-import type { Staff, NewStaff } from '@/types/staff'
-import type { Schedule, NewSchedule } from '@/types/schedule'
+import type { NewStaff } from '@/types/staff'
+import type { NewSchedule } from '@/types/schedule'
+import { useDutyStore } from '@/stores/duty'
 import { log, errorMessage } from '@/utils/logger'
 
-const items = ref<Staff[]>([])
+const store = useDutyStore()
 const loading = ref(false)
 const error = ref('')
-const schedule = ref<Schedule[]>([])
 
 async function refresh() {
   loading.value = true
   error.value = ''
   try {
-    const [staffList, scheduleList] = await Promise.all([
-      listStaff(),
-      listSchedule(),
-    ])
-    items.value = staffList
-    schedule.value = scheduleList
+    await Promise.all([store.loadStaff(), store.loadSchedule(), store.loadStats()])
   } catch (e) {
     const msg = errorMessage(e)
     log.error('Failed to load staff', e)
@@ -38,8 +31,7 @@ async function refresh() {
 async function onCreate(payload: NewStaff) {
   error.value = ''
   try {
-    const created = await createStaff(payload)
-    items.value = [...items.value, created]
+    await store.createStaff(payload)
   } catch (e) {
     const msg = errorMessage(e)
     log.error('Failed to create staff', e)
@@ -50,8 +42,7 @@ async function onCreate(payload: NewStaff) {
 async function onDelete(id: number) {
   error.value = ''
   try {
-    await deleteStaff(id)
-    items.value = items.value.filter((x) => x.id !== id)
+    await store.deleteStaff(id)
   } catch (e) {
     const msg = errorMessage(e)
     log.error('Failed to delete staff', e)
@@ -62,8 +53,7 @@ async function onDelete(id: number) {
 async function onAssign(payload: NewSchedule) {
   error.value = ''
   try {
-    const created = await createSchedule(payload)
-    schedule.value = [...schedule.value, created]
+    await store.createSchedule(payload)
   } catch (e) {
     const msg = errorMessage(e)
     log.error('Failed to assign duty', e)
@@ -74,8 +64,7 @@ async function onAssign(payload: NewSchedule) {
 async function onUnassign(dateStr: string) {
   error.value = ''
   try {
-    await deleteScheduleByDate(dateStr)
-    schedule.value = schedule.value.filter((x) => new Date(x.date).toISOString().slice(0, 10) !== dateStr)
+    await store.deleteScheduleByDate(dateStr)
   } catch (e) {
     const msg = errorMessage(e)
     log.error('Failed to remove duty', e)
@@ -92,16 +81,16 @@ onMounted(refresh)
     <p v-if="error" class="text-red-600">{{ error }}</p>
     <p v-if="loading" class="text-gray-600">Loading…</p>
     <StaffForm @submit="onCreate" />
-    <StaffTable :items="items" @delete="onDelete" />
+    <StaffTable :items="store.staff" @delete="onDelete" />
 
     <section class="space-y-3">
       <h2 class="text-xl font-semibold">Duty Scheduling</h2>
-      <ScheduleForm :staff="items" @submit="onAssign" />
-      <ScheduleTable :items="schedule" :staff="items" @delete="onUnassign" />
+      <ScheduleForm :staff="store.staff" @submit="onAssign" />
+      <ScheduleTable :items="store.schedule" :staff="store.staff" @delete="onUnassign" />
     </section>
 
     <section class="space-y-3">
-      <StatsPage :staff="items" />
+      <StatsPage :staff="store.staff" :refresh-key="store.schedule.length" />
     </section>
   </main>
   
