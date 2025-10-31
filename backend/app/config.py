@@ -19,4 +19,5 @@ class LogLevel(str, Enum):
     ERROR = "ERROR"
 
 
-FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173")
+DEV_FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173")
+PROD_FRONTEND_ORIGIN = os.getenv("PROD_FRONTEND_ORIGIN", "http://localhost:4173")

@@ -1,28 +1,32 @@
 ## PRE-REQUISITES
 - Node.js
-- NPM
+- npm
 - python pip
-- uv `pip install uv`
+- install uv `pip install uv`
 
 
-#### Setup DB
+#### Setup SQLLITE DB (MUST DO THIS FIRST)
 ```
 cd backend/app
 alembic history
 alembic upgrade head
 ```
 
-### Start Frontend
-
-
 ### Start Backend
 ```
 cd backend
+uv sync
 uv run python -m app.main
 ```
 
-
-
+### Start Frontend
+build prod and run preview
+```
+cd frontend
+npm install
+npm run build
+npm run preview
+```
 
 
 ### Database & Alembic (SQLite)

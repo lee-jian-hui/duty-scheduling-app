@@ -11,7 +11,7 @@ def create_app() -> FastAPI:
 
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[config.FRONTEND_ORIGIN],
+        allow_origins=[config.DEV_FRONTEND_ORIGIN, config.PROD_FRONTEND_ORIGIN],
         allow_credentials=False,
         allow_methods=["*"],
         allow_headers=["*"],
