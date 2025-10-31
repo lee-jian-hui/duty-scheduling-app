@@ -1,4 +1,13 @@
+## PRE-REQUISITES
 
+
+
+#### Setup DB
+```
+cd backend/app
+alembic history
+alembic upgrade head
+```
 
 ### Start Frontend
 
@@ -9,11 +18,9 @@ cd backend
 uv run python -m app.main
 ```
 
-alembic migrations
-```
-cd backend/app
-alembic history
-```
+
+
+
 
 ### Database & Alembic (SQLite)
 

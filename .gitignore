@@ -249,3 +249,4 @@ __marimo__/
 REQS.md
 BACKEND_REQS.md
 FRONTEND_REQS.md
+*.db

@@ -1,19 +1,23 @@
 from __future__ import annotations
 
+from fastapi import Depends
+from sqlalchemy.orm import Session
+
+from app.db import get_db
 from app.core.services import StaffService, ScheduleService
 from app.core.repositories import (
-    InMemoryStaffRepository,
-    InMemoryScheduleRepository,
+    SQLAlchemyStaffRepository,
+    SQLAlchemyScheduleRepository,
 )
 
-# Shared in-memory repositories for the app lifecycle
-_staff_repo = InMemoryStaffRepository()
-_schedule_repo = InMemoryScheduleRepository()
+
+def get_staff_service(db: Session = Depends(get_db)) -> StaffService:
+    staff_repo = SQLAlchemyStaffRepository(db)
+    schedule_repo = SQLAlchemyScheduleRepository(db)
+    return StaffService(staff_repo, schedule_repo)
 
 
-def get_staff_service() -> StaffService:
-    return StaffService(_staff_repo, _schedule_repo)
-
-
-def get_schedule_service() -> ScheduleService:
-    return ScheduleService(_schedule_repo, _staff_repo)
+def get_schedule_service(db: Session = Depends(get_db)) -> ScheduleService:
+    schedule_repo = SQLAlchemyScheduleRepository(db)
+    staff_repo = SQLAlchemyStaffRepository(db)
+    return ScheduleService(schedule_repo, staff_repo)

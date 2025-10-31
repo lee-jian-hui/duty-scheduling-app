@@ -3,64 +3,48 @@ from __future__ import annotations
 import os
 import sys
 from logging.config import fileConfig
+from pathlib import Path
 
-from sqlalchemy import engine_from_config, pool
 from alembic import context
+from sqlalchemy import engine_from_config, pool
 
-# Ensure 'app' package is importable
-HERE = os.path.abspath(os.path.dirname(__file__))
-APP_DIR = os.path.abspath(os.path.join(HERE, "..", ".."))  # backend/app
-BACKEND_DIR = os.path.dirname(APP_DIR)
-if BACKEND_DIR not in sys.path:
-    sys.path.append(BACKEND_DIR)
 
-# Import SQLAlchemy Base and models so autogenerate can discover metadata
+# Ensure the Python path includes the directory that contains the
+# `app` package (the backend/ folder). This makes `import app` work
+# regardless of the current working directory when running Alembic.
+HERE = Path(__file__).resolve()
+BACKEND_DIR = HERE.parents[3]  # .../backend
+if str(BACKEND_DIR) not in sys.path:
+    sys.path.append(str(BACKEND_DIR))
+
+# Import SQLAlchemy Base and ensure models are imported so metadata is populated
 from app.db import Base  # type: ignore  # noqa: E402
-from app.core.db_models import StaffORM, DutyScheduleORM  # type: ignore  # noqa: E402,F401
+from app.core import db_models as _models  # type: ignore  # noqa: E402,F401
 
-# this is the Alembic Config object, which provides
-# access to the values within the .ini file in use.
+
+# Alembic Config object, provides access to the .ini file in use.
 config = context.config
 
 # Interpret the config file for Python logging.
-# This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# add your model's MetaData object here
-# for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
+# Set target metadata for 'autogenerate'
 target_metadata = Base.metadata
-
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
 
 
 def _database_url() -> str:
-    # Prefer environment variable
+    # Prefer DATABASE_URL if provided
     env_url = os.getenv("DATABASE_URL")
     if env_url:
         return env_url
-    # Default to app-local SQLite file
-    db_path = os.path.join(APP_DIR, "app.db")
+    # Default to SQLite DB located at backend/app/app.db
+    app_dir = HERE.parents[2]  # .../backend/app
+    db_path = app_dir / "app.db"
     return f"sqlite:///{db_path}"
 
 
 def run_migrations_offline() -> None:
-    """Run migrations in 'offline' mode.
-
-    This configures the context with just a URL
-    and not an Engine, though an Engine is acceptable
-    here as well.  By skipping the Engine creation
-    we don't even need a DBAPI to be available.
-
-    Calls to context.execute() here emit the given string to the
-    script output.
-
-    """
     url = _database_url()
     context.configure(
         url=url,
@@ -75,15 +59,8 @@ def run_migrations_offline() -> None:
 
 
 def run_migrations_online() -> None:
-    """Run migrations in 'online' mode.
-
-    In this scenario we need to create an Engine
-    and associate a connection with the context.
-
-    """
-    # Ensure URL is set and absolute
-    url = _database_url()
-    config.set_main_option("sqlalchemy.url", url)
+    # Ensure the URL is set even if the ini has a placeholder
+    config.set_main_option("sqlalchemy.url", _database_url())
 
     connectable = engine_from_config(
         config.get_section(config.config_ini_section, {}),
@@ -106,3 +83,4 @@ if context.is_offline_mode():
     run_migrations_offline()
 else:
     run_migrations_online()
+
