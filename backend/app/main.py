@@ -1,4 +1,6 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from app import config
 import uvicorn
 
 from .core.routers import staff_router, schedule_router, statistics_router
@@ -6,6 +8,14 @@ from .core.routers import staff_router, schedule_router, statistics_router
 
 def create_app() -> FastAPI:
     app = FastAPI(title="Duty Personnel Management API", version="0.1.0")
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[config.FRONTEND_ORIGIN],
+        allow_credentials=False,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
     app.include_router(staff_router)
     app.include_router(schedule_router)
