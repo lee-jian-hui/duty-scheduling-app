@@ -4,7 +4,7 @@ from fastapi import Depends
 from sqlalchemy.orm import Session
 
 from app.db import get_db
-from app.core.services import StaffService, ScheduleService
+from app.core.services import StaffService, ScheduleService, StatisticsService
 from app.core.repositories import (
     SQLAlchemyStaffRepository,
     SQLAlchemyScheduleRepository,
@@ -21,3 +21,8 @@ def get_schedule_service(db: Session = Depends(get_db)) -> ScheduleService:
     schedule_repo = SQLAlchemyScheduleRepository(db)
     staff_repo = SQLAlchemyStaffRepository(db)
     return ScheduleService(schedule_repo, staff_repo)
+
+
+def get_statistics_service(db: Session = Depends(get_db)) -> StatisticsService:
+    schedule_repo = SQLAlchemyScheduleRepository(db)
+    return StatisticsService(schedule_repo)

@@ -4,6 +4,7 @@ import StaffForm from './components/StaffForm.vue'
 import StaffTable from './components/StaffTable.vue'
 import ScheduleForm from './components/ScheduleForm.vue'
 import ScheduleTable from './components/ScheduleTable.vue'
+import StatsPage from './pages/StatsPage.vue'
 import { listStaff, createStaff, deleteStaff } from './api/staffApi'
 import { listSchedule, createSchedule, deleteScheduleByDate } from './api/scheduleApi'
 import type { Staff, NewStaff } from '@/types/staff'
@@ -97,6 +98,10 @@ onMounted(refresh)
       <h2 class="text-xl font-semibold">Duty Scheduling</h2>
       <ScheduleForm :staff="items" @submit="onAssign" />
       <ScheduleTable :items="schedule" :staff="items" @delete="onUnassign" />
+    </section>
+
+    <section class="space-y-3">
+      <StatsPage :staff="items" />
     </section>
   </main>
   
