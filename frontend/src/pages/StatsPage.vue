@@ -23,14 +23,14 @@
     </div>
 
     <div>
-      <canvas v-if="chartReady" ref="chartEl" height="120"></canvas>
-      <p v-else class="text-gray-500 text-sm">Install chart.js to enable bar chart (npm i chart.js).</p>
+      <canvas ref="chartEl" height="120" style="display: none;"></canvas>
+      <p v-if="!chartReady" class="text-gray-500 text-sm">Loading chart...</p>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import type { Staff } from '@/types/staff'
 import { useDutyStore } from '@/stores/duty'
 import { log } from '@/utils/logger'
@@ -54,17 +54,35 @@ const chartReady = ref(false)
 let destroyChart: (() => void) | null = null
 
 async function drawChart() {
+  console.log('drawChart called, chartEl.value:', chartEl.value)
+  console.log('rows.value:', rows.value)
+
   try {
     const mod = await import('chart.js/auto')
+    console.log('chart.js imported successfully')
     const Chart = mod.default
+
     if (destroyChart) {
       destroyChart()
       destroyChart = null
     }
-    const ctx = chartEl.value!.getContext('2d')!
+
+    if (!chartEl.value) {
+      console.error('chartEl.value is null')
+      return
+    }
+
+    const ctx = chartEl.value.getContext('2d')
+    if (!ctx) {
+      console.error('Could not get 2d context')
+      return
+    }
+
     // Build labels and data from rows
     const labels = rows.value.map((r) => r.name)
     const data = rows.value.map((r) => r.count)
+    console.log('Chart data:', { labels, data })
+
     const inst = new Chart(ctx, {
       type: 'bar',
       data: {
@@ -85,10 +103,19 @@ async function drawChart() {
         },
       },
     })
+
     destroyChart = () => inst.destroy()
     chartReady.value = true
+
+    // Show the canvas now that chart is ready
+    if (chartEl.value) {
+      chartEl.value.style.display = 'block'
+    }
+
+    console.log('Chart created successfully, chartReady:', chartReady.value)
   } catch (e) {
     chartReady.value = false
+    console.error('Chart creation failed:', e)
     log.warn('Chart unavailable (install chart.js to enable)', e)
   }
 }
@@ -96,9 +123,26 @@ async function drawChart() {
 // Watch for changes in stats and redraw chart
 watch(
   () => dutyStore.stats,
-  () => {
-    drawChart()
+  async (newStats) => {
+    console.log('Stats watcher triggered, stats:', newStats)
+    console.log('chartEl.value at watch time:', chartEl.value)
+
+    // Wait for next tick to ensure canvas is mounted
+    await nextTick()
+    console.log('After nextTick, chartEl.value:', chartEl.value)
+
+    if (chartEl.value) {
+      await drawChart()
+    } else {
+      console.log('chartEl.value is still null after nextTick')
+    }
   },
   { immediate: true }
 )
+
+// Also add onMounted to see when component mounts
+onMounted(() => {
+  console.log('StatsPage mounted, dutyStore.stats:', dutyStore.stats)
+  console.log('chartEl.value on mount:', chartEl.value)
+})
 </script>
