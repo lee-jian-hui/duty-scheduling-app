@@ -4,14 +4,14 @@ refer to `SETUP.md`
 
 ## Features:
 Staff Manager to add/delete staffs
-![alt text](staff.png)
+![alt text](images/staff.png)
 
 Scheduler Calendar
 - intelligent scheduling
 - clean UI
-![alt text](schedule_cal.png)
+![alt text](images/schedule_cal.png)
 - picker to upsert staff schedule
-![alt text](picker.png)
+![alt text](images/picker.png)
 - schedule export to csv
-![alt text](exportcsv1.png)
-![alt text](exportcsv2.png)
+![alt text](images/exportcsv1.png)
+![alt text](images/exportcsv2.png)
