@@ -28,6 +28,10 @@ class ScheduleRepository(ABC):
     def delete_all(self) -> None:
         raise NotImplementedError
 
+    @abstractmethod
+    def delete_by_staff_id(self, staff_id: int) -> None:
+        raise NotImplementedError
+
 
 class InMemoryScheduleRepository(ScheduleRepository):
     def __init__(self) -> None:
@@ -48,6 +52,9 @@ class InMemoryScheduleRepository(ScheduleRepository):
 
     def delete_all(self) -> None:
         self._items = []
+
+    def delete_by_staff_id(self, staff_id: int) -> None:
+        self._items = [item for item in self._items if item.staff_id != staff_id]
 
 
 class SQLAlchemyScheduleRepository(ScheduleRepository):
@@ -76,4 +83,8 @@ class SQLAlchemyScheduleRepository(ScheduleRepository):
 
     def delete_all(self) -> None:
         self.session.execute(delete(DutyScheduleORM))
+        self.session.commit()
+
+    def delete_by_staff_id(self, staff_id: int) -> None:
+        self.session.execute(delete(DutyScheduleORM).where(DutyScheduleORM.staff_id == staff_id))
         self.session.commit()

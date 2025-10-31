@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query
 
 from ..dto_models.staff import StaffCreate, StaffRead
 from ..services import StaffService
@@ -29,9 +29,13 @@ def add_staff(payload: StaffCreate, svc: StaffService = Depends(get_staff_servic
 
 
 @router.delete("/{staff_id}")
-def delete_staff(staff_id: int, svc: StaffService = Depends(get_staff_service)) -> dict:
+def delete_staff(
+    staff_id: int,
+    force: bool = Query(False, description="Cascade delete duties for this staff if true"),
+    svc: StaffService = Depends(get_staff_service),
+) -> dict:
     try:
-        svc.delete_staff(staff_id)
+        svc.delete_staff(staff_id, force=force)
         return {"deleted": True}
     except ValueError as e:
         if str(e) == "has_duties":

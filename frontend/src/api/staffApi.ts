@@ -11,8 +11,7 @@ export async function createStaff(payload: NewStaff): Promise<Staff> {
   return data
 }
 
-export async function deleteStaff(staffId: number): Promise<{ deleted: boolean }> {
-  const { data } = await api.delete<{ deleted: boolean }>(`/api/staff/${staffId}`)
+export async function deleteStaff(staffId: number, force = false): Promise<{ deleted: boolean }> {
+  const { data } = await api.delete<{ deleted: boolean }>(`/api/staff/${staffId}` , { params: { force } })
   return data
 }
-

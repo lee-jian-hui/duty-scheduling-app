@@ -15,11 +15,10 @@ export const useStaffStore = defineStore('staff', () => {
     staff.value = [...staff.value, created]
   }
 
-  async function deleteStaff(id: number) {
-    await apiDeleteStaff(id)
+  async function deleteStaff(id: number, opts?: { force?: boolean }) {
+    await apiDeleteStaff(id, opts?.force ?? false)
     staff.value = staff.value.filter((s) => s.id !== id)
   }
 
   return { staff, loadStaff, createStaff, deleteStaff }
 })
-

@@ -29,9 +29,12 @@ class StaffService:
         saved = self.staff_repo.add(entity)
         return StaffRead(id=saved.id, name=saved.name, age=saved.age, position=saved.position)
 
-    def delete_staff(self, staff_id: int) -> None:
-        # Prevent deletion if staff has scheduled duties
+    def delete_staff(self, staff_id: int, *, force: bool = False) -> None:
+        # Prevent deletion if staff has scheduled duties unless force is requested
         schedules = self.schedule_repo.list()
         if any(s.staff_id == staff_id for s in schedules):
-            raise ValueError("has_duties")
+            if not force:
+                raise ValueError("has_duties")
+            # Cascade: remove all duties for this staff first
+            self.schedule_repo.delete_by_staff_id(staff_id)
         self.staff_repo.delete(staff_id)

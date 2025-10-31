@@ -37,7 +37,24 @@ const onCreate = (payload: NewStaff) =>
   })
 
 const onDelete = (id: number) =>
-  run(() => staffStore.deleteStaff(id))
+  run(async () => {
+    try {
+      await staffStore.deleteStaff(id)
+    } catch (e: any) {
+      // If staff has duties, ask for confirmation to cascade delete
+      const status = (e?.response?.status as number | undefined)
+      if (status === 409) {
+        const confirmed = window.confirm('This staff still has scheduled duties. Delete staff and remove those duties?')
+        if (confirmed) {
+          await staffStore.deleteStaff(id, { force: true })
+        } else {
+          throw e
+        }
+      } else {
+        throw e
+      }
+    }
+  })
 
 const onAssign = (payload: NewSchedule) =>
   run(() => scheduleStore.createSchedule(payload), {
