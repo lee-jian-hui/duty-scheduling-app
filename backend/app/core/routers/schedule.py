@@ -6,7 +6,8 @@ from ..dto_models.schedule import ScheduleCreate, ScheduleRead
 from ..services import ScheduleService
 from app.deps import get_schedule_service
 
-
+" 200 OK
+INFO:     127.0.0.1:36754 - "DELETE /api/schedule/2025-10-31 HTTP/1.1" 404 Not Found
 
 
 router = APIRouter(prefix="/api/schedule", tags=["schedule"])
