@@ -15,3 +15,8 @@ export async function deleteStaff(staffId: number, force = false): Promise<{ del
   const { data } = await api.delete<{ deleted: boolean }>(`/api/staff/${staffId}` , { params: { force } })
   return data
 }
+
+export async function wipeAllStaff(): Promise<{ deleted: boolean }> {
+  const { data } = await api.delete<{ deleted: boolean }>(`/api/staff`)
+  return data
+}

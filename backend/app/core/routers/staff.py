@@ -41,3 +41,9 @@ def delete_staff(
         if str(e) == "has_duties":
             raise HTTPException(status_code=409, detail="Cannot delete staff with assigned duties")
         raise
+
+
+@router.delete("")
+def wipe_all_staff(svc: StaffService = Depends(get_staff_service)) -> dict:
+    svc.wipe_all()
+    return {"deleted": True}

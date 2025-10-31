@@ -6,6 +6,7 @@ import ScheduleForm from './components/ScheduleForm.vue'
 import ScheduleTable from './components/ScheduleTable.vue'
 import StatsPage from './pages/StatsPage.vue'
 import CalendarPage from './pages/CalendarPage.vue'
+import ErrorModal from './components/ErrorModal.vue'
 
 import type { NewStaff } from '@/types/staff'
 import type { NewSchedule } from '@/types/schedule'
@@ -47,6 +48,8 @@ const onDelete = (id: number) =>
         const confirmed = window.confirm('This staff still has scheduled duties. Delete staff and remove those duties?')
         if (confirmed) {
           await staffStore.deleteStaff(id, { force: true })
+          // After cascading on backend, refresh schedule and stats to drop placeholders like #id
+          await Promise.all([scheduleStore.loadSchedule(), dutyStore.loadStats()])
         } else {
           throw e
         }
@@ -89,11 +92,16 @@ const onAssignFromCalendar = (evt: { payload: NewSchedule; mode: 'create' | 'upd
   <main class="max-w-3xl mx-auto p-4 space-y-6">
     <h1 class="text-2xl font-semibold">Staff Manager</h1>
 
-    <p v-if="error" class="text-red-600">{{ error }}</p>
+    <!-- Global error modal replaces inline banner -->
     <p v-if="loading" class="text-gray-600">Loading…</p>
 
     <!-- Staff -->
-    <StaffForm @submit="onCreate" />
+    <div class="flex items-end gap-3">
+      <div class="flex-1 min-w-0">
+        <StaffForm @submit="onCreate" />
+      </div>
+
+    </div>
     <StaffTable :items="staffStore.staff" @delete="onDelete" />
 
     <!-- Schedule -->
@@ -119,6 +127,7 @@ const onAssignFromCalendar = (evt: { payload: NewSchedule; mode: 'create' | 'upd
     />
     <!-- Stats -->
     <StatsPage :staff="staffStore.staff" />
+    <ErrorModal />
 
   </main>
 </template>

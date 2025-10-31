@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
-from sqlalchemy import select, func
+from sqlalchemy import select, func, delete
 from sqlalchemy.orm import Session
 
 from ..models import Staff
@@ -29,6 +29,10 @@ class StaffRepository(ABC):
 
     @abstractmethod
     def exists_by_name(self, name: str) -> bool:
+        raise NotImplementedError
+
+    @abstractmethod
+    def delete_all(self) -> None:
         raise NotImplementedError
 
 
@@ -65,6 +69,10 @@ class InMemoryStaffRepository(StaffRepository):
     def exists_by_name(self, name: str) -> bool:
         needle = name.strip().lower()
         return any(s.name.strip().lower() == needle for s in self._items)
+
+    def delete_all(self) -> None:
+        self._items = []
+        self._next_id = 1
 
 
 class SQLAlchemyStaffRepository(StaffRepository):
@@ -103,3 +111,7 @@ class SQLAlchemyStaffRepository(StaffRepository):
         needle = name.strip().lower()
         stmt = select(StaffORM.id).where(func.lower(StaffORM.name) == needle).limit(1)
         return self.session.execute(stmt).first() is not None
+
+    def delete_all(self) -> None:
+        self.session.execute(delete(StaffORM))
+        self.session.commit()

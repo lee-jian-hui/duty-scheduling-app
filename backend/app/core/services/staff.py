@@ -38,3 +38,8 @@ class StaffService:
             # Cascade: remove all duties for this staff first
             self.schedule_repo.delete_by_staff_id(staff_id)
         self.staff_repo.delete(staff_id)
+
+    def wipe_all(self) -> None:
+        # Cascade: remove all schedules, then all staff
+        self.schedule_repo.delete_all()
+        self.staff_repo.delete_all()

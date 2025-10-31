@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { Staff, NewStaff } from '@/types/staff'
-import { listStaff, createStaff as apiCreateStaff, deleteStaff as apiDeleteStaff } from '@/api/staffApi'
+import { listStaff, createStaff as apiCreateStaff, deleteStaff as apiDeleteStaff, wipeAllStaff as apiWipeAllStaff } from '@/api/staffApi'
 
 export const useStaffStore = defineStore('staff', () => {
   const staff = ref<Staff[]>([])
@@ -20,5 +20,10 @@ export const useStaffStore = defineStore('staff', () => {
     staff.value = staff.value.filter((s) => s.id !== id)
   }
 
-  return { staff, loadStaff, createStaff, deleteStaff }
+  async function wipeAll() {
+    await apiWipeAllStaff()
+    staff.value = []
+  }
+
+  return { staff, loadStaff, createStaff, deleteStaff, wipeAll }
 })
