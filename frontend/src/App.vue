@@ -64,7 +64,7 @@ const onUnassign = (date: string) =>
     <StaffTable :items="staffStore.staff" @delete="onDelete" />
 
     <!-- Schedule -->
-    <section class="space-y-3">
+    <!-- <section class="space-y-3">
       <h2 class="text-xl font-semibold">Duty Scheduling</h2>
       <ScheduleForm :staff="staffStore.staff" @submit="onAssign" />
       <ScheduleTable
@@ -72,12 +72,12 @@ const onUnassign = (date: string) =>
         :staff="staffStore.staff"
         @delete="onUnassign"
       />
-    </section>
+    </section> -->
 
+    <!-- Calendar -->
+    <CalendarPage :staff="staffStore.staff" :schedule="scheduleStore.schedule" @assign="onAssign" />
     <!-- Stats -->
     <StatsPage :staff="staffStore.staff" :refresh-key="scheduleStore.schedule.length" />
 
-    <!-- Calendar -->
-    <CalendarPage :staff="staffStore.staff" :schedule="scheduleStore.schedule" />
   </main>
 </template>

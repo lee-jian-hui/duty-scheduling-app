@@ -2,7 +2,7 @@
   <form class="p-4 grid gap-3" @submit.prevent="onSubmit">
     <div class="grid gap-1">
       <label class="text-sm text-gray-700">Date</label>
-      <input v-model="date" type="date" class="border rounded px-2 py-1" required />
+      <input v-model="date" type="date" class="border rounded px-2 py-1" :disabled="lockDate" required />
     </div>
     <div class="grid gap-1">
       <label class="text-sm text-gray-700">Staff</label>
@@ -18,15 +18,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch, toRef } from 'vue'
 import type { Staff } from '@/types/staff'
 import type { NewSchedule } from '@/types/schedule'
 
-const props = defineProps<{ staff: Staff[] }>()
+const props = defineProps<{ staff: Staff[]; defaultDate?: string; lockDate?: boolean }>()
 const emit = defineEmits<{ (e: 'submit', payload: NewSchedule): void }>()
 
-const date = ref<string>('')
+const lockDate = toRef(props, 'lockDate')
+const date = ref<string>(props.defaultDate ?? '')
 const staffId = ref<number | ''>('')
+
+watch(
+  () => props.defaultDate,
+  (val) => {
+    if (val) date.value = val
+  }
+)
 
 function onSubmit() {
   if (!date.value || !staffId.value) return
@@ -37,4 +45,3 @@ function onSubmit() {
   staffId.value = ''
 }
 </script>
-
