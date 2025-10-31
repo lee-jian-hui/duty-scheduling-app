@@ -50,3 +50,12 @@ class ScheduleCreateResponse(ScheduleRead):
 class ScheduleUpdateRequest(BaseModel):
     """Payload to update/replace assignment for a given date."""
     staff_id: int
+
+
+class IntelligentScheduleRequest(BaseModel):
+    start_date: datetime
+    end_date: datetime
+
+
+class ScheduleWipeResponse(BaseModel):
+    deleted: bool = True

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from typing import List
-from datetime import datetime
+from datetime import datetime, date, timedelta
 
 from ..models import DutySchedule
 from ..repositories import ScheduleRepository, StaffRepository
@@ -56,3 +56,32 @@ class ScheduleService:
         saved = self.schedule_repo.add(entity)
         dt = datetime.fromisoformat(saved.date)
         return ScheduleRead(id="", date=dt, staff_id=saved.staff_id)
+
+    def wipe_all(self) -> None:
+        self.schedule_repo.delete_all()
+
+    def generate_round_robin(self, start: date, end: date) -> List[ScheduleRead]:
+        # Validate input range
+        if end < start:
+            raise ValueError("invalid_range")
+
+        staff_list = self.staff_repo.list()
+        if not staff_list:
+            raise ValueError("no_staff")
+
+        # Deterministic order by id, then name
+        staff_list = sorted(staff_list, key=lambda s: (s.id, s.name))
+
+        out: List[ScheduleRead] = []
+        day = start
+        idx = 0
+        while day <= end:
+            date_str = day.isoformat()
+            # Replace any existing assignment for the date
+            self.schedule_repo.delete_by_date(date_str)
+            staff = staff_list[idx % len(staff_list)]
+            saved = self.schedule_repo.add(DutySchedule(date=date_str, staff_id=staff.id))
+            out.append(ScheduleRead(id="", date=datetime.fromisoformat(saved.date), staff_id=saved.staff_id))
+            idx += 1
+            day += timedelta(days=1)
+        return out

@@ -24,6 +24,10 @@ class ScheduleRepository(ABC):
     def delete_by_date(self, date_str: str) -> None:
         raise NotImplementedError
 
+    @abstractmethod
+    def delete_all(self) -> None:
+        raise NotImplementedError
+
 
 class InMemoryScheduleRepository(ScheduleRepository):
     def __init__(self) -> None:
@@ -41,6 +45,9 @@ class InMemoryScheduleRepository(ScheduleRepository):
 
     def delete_by_date(self, date_str: str) -> None:
         self._items = [item for item in self._items if item.date != date_str]
+
+    def delete_all(self) -> None:
+        self._items = []
 
 
 class SQLAlchemyScheduleRepository(ScheduleRepository):
@@ -65,4 +72,8 @@ class SQLAlchemyScheduleRepository(ScheduleRepository):
     def delete_by_date(self, date_str: str) -> None:
         # Delete all assignments on the given date
         self.session.execute(delete(DutyScheduleORM).where(DutyScheduleORM.date == date_str))
+        self.session.commit()
+
+    def delete_all(self) -> None:
+        self.session.execute(delete(DutyScheduleORM))
         self.session.commit()

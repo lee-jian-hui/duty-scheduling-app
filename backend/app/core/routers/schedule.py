@@ -2,7 +2,14 @@ from typing import List
 
 from fastapi import APIRouter, HTTPException, Depends
 
-from ..dto_models.schedule import ScheduleCreate, ScheduleDeleteResponse, ScheduleRead, ScheduleUpdateRequest
+from ..dto_models.schedule import (
+    ScheduleCreate,
+    ScheduleDeleteResponse,
+    ScheduleRead,
+    ScheduleUpdateRequest,
+    IntelligentScheduleRequest,
+    ScheduleWipeResponse,
+)
 from ..services import ScheduleService
 from app.deps import get_schedule_service
 
@@ -47,3 +54,23 @@ def replace_duty(date: str, payload: ScheduleUpdateRequest, svc: ScheduleService
         if str(e) == "staff_not_found":
             raise HTTPException(status_code=400, detail="Staff not found")
         raise
+
+
+@router.post("/intelligent-schedule", response_model=List[ScheduleRead])
+def intelligent_schedule(payload: IntelligentScheduleRequest, svc: ScheduleService = Depends(get_schedule_service)) -> List[ScheduleRead]:
+    try:
+        start = payload.start_date.date()
+        end = payload.end_date.date()
+        return svc.generate_round_robin(start, end)
+    except ValueError as e:
+        if str(e) == "invalid_range":
+            raise HTTPException(status_code=400, detail="Invalid date range")
+        if str(e) == "no_staff":
+            raise HTTPException(status_code=400, detail="No staff available")
+        raise
+
+
+@router.delete("", response_model=ScheduleWipeResponse)
+def wipe_all(svc: ScheduleService = Depends(get_schedule_service)) -> ScheduleWipeResponse:
+    svc.wipe_all()
+    return ScheduleWipeResponse(deleted=True)
