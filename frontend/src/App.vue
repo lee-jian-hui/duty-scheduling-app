@@ -51,7 +51,8 @@ const onDelete = (id: number) =>
           // After cascading on backend, refresh schedule and stats to drop placeholders like #id
           await Promise.all([scheduleStore.loadSchedule(), dutyStore.loadStats()])
         } else {
-          throw e
+          // User canceled: swallow the original 409 so no global error modal pops
+          return
         }
       } else {
         throw e
