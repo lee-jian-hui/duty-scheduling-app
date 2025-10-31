@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import type { Schedule, NewSchedule } from '@/types/schedule'
 import { listSchedule, createSchedule as apiCreateSchedule, deleteScheduleByDate as apiDeleteScheduleByDate, replaceScheduleByDate as apiReplaceScheduleByDate } from '@/api/scheduleApi'
 import { useDutyStore } from './duty'
+import { dateKeyFromISO } from '@/utils/date'
 
 export const useScheduleStore = defineStore('schedule', () => {
   const schedule = ref<Schedule[]>([])
@@ -21,17 +22,20 @@ export const useScheduleStore = defineStore('schedule', () => {
 
   async function deleteScheduleByDate(dateStr: string) {
     await apiDeleteScheduleByDate(dateStr)
-    schedule.value = schedule.value.filter((x) => new Date(x.date).toISOString().slice(0, 10) !== dateStr)
+    schedule.value = schedule.value.filter((x) => dateKeyFromISO(x.date) !== dateStr)
     const duty = useDutyStore()
     await duty.loadStats()
   }
 
   async function replaceScheduleByDate(dateStr: string, staffId: number) {
     const updated = await apiReplaceScheduleByDate(dateStr, staffId)
-    // Remove existing assignments for the date, then add the updated one
-    const day = dateStr
-    schedule.value = schedule.value.filter((x) => new Date(x.date).toISOString().slice(0, 10) !== day)
+
+    // Remove all existing assignments for this date
+    schedule.value = schedule.value.filter((x) => dateKeyFromISO(x.date) !== dateStr)
+
+    // Add the new assignment
     schedule.value = [...schedule.value, updated]
+
     const duty = useDutyStore()
     await duty.loadStats()
   }

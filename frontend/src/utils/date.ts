@@ -28,3 +28,14 @@ export function getMonthMatrix(year: number, monthIndex0: number) {
   return matrix
 }
 
+// Robustly extract YYYY-MM-DD from API datetime strings without tz drift
+export function dateKeyFromISO(isoLike: string): string {
+  // API returns strings like `2025-11-03T00:00:00` or `...Z`. The first 10 chars are the date.
+  if (typeof isoLike === 'string' && isoLike.length >= 10) return isoLike.slice(0, 10)
+  // Fallback
+  try {
+    return new Date(isoLike as any).toISOString().slice(0, 10)
+  } catch {
+    return String(isoLike)
+  }
+}

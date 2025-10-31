@@ -1,8 +1,6 @@
 <template>
   <section class="space-y-4 p-4">
     <h2 class="text-xl font-semibold">Duty Statistics</h2>
-    <div v-if="error" class="text-red-600">{{ error }}</div>
-    <div v-if="loading" class="text-gray-600">Loading…</div>
 
     <div>
       <table class="min-w-full border divide-y divide-gray-200">
@@ -34,18 +32,15 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import type { Staff } from '@/types/staff'
-import type { DutyStat } from '@/types/stats'
-import { listDutyStats } from '@/api/statsApi'
-import { log, errorMessage } from '@/utils/logger'
+import { useDutyStore } from '@/stores/duty'
+import { log } from '@/utils/logger'
 
-const props = defineProps<{ staff: Staff[]; refreshKey?: number }>()
+const props = defineProps<{ staff: Staff[] }>()
 
-const stats = ref<DutyStat[]>([])
-const loading = ref(false)
-const error = ref('')
+const dutyStore = useDutyStore()
 
 const rows = computed(() => {
-  return stats.value
+  return dutyStore.stats
     .map((s) => ({
       staff_id: s.staff_id,
       count: s.count,
@@ -98,31 +93,12 @@ async function drawChart() {
   }
 }
 
-async function refresh() {
-  loading.value = true
-  error.value = ''
-  try {
-    stats.value = await listDutyStats()
-    await drawChart()
-  } catch (e) {
-    const msg = errorMessage(e)
-    log.error('Failed to load stats', e)
-    error.value = `Failed to load stats: ${msg}`
-  } finally {
-    loading.value = false
-  }
-}
-
-onMounted(refresh)
-
-// Re-fetch stats when the parent signals changes (e.g., schedule length)
+// Watch for changes in stats and redraw chart
 watch(
-  () => props.refreshKey,
+  () => dutyStore.stats,
   () => {
-    // Avoid double call on initial mount if undefined
-    if (typeof props.refreshKey !== 'undefined') {
-      refresh()
-    }
-  }
+    drawChart()
+  },
+  { immediate: true }
 )
 </script>

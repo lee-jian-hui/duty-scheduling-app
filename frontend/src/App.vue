@@ -98,7 +98,7 @@ const onAssignFromCalendar = (evt: { payload: NewSchedule; mode: 'create' | 'upd
       @delete-date="onUnassign"
     />
     <!-- Stats -->
-    <StatsPage :staff="staffStore.staff" :refresh-key="scheduleStore.schedule.length" />
+    <StatsPage :staff="staffStore.staff" />
 
   </main>
 </template>

@@ -40,7 +40,7 @@
     // Map YYYY-MM-DD -> array of staff names
     const map = new Map<string, string[]>()
     for (const s of props.schedule) {
-      const key = formatISODate(new Date(s.date))
+      const key = s.date.slice(0, 10)
       const staff = props.staff.find((x) => x.id === s.staff_id)
       const name = staff ? staff.name : `#${s.staff_id}`
       const arr = map.get(key) || []
@@ -78,11 +78,8 @@
     showAssign.value = false
   }
   function onAssign(payload: NewSchedule) {
-    // Determine if there are existing assignments for this date; if so, send update
-    const hasExisting = (scheduleMap.value.get(selectedDate.value)?.length || 0) > 0
-    const mode = hasExisting ? 'update' : 'create'
-    console.log('onAssign mode:', mode, 'hasExisting:', hasExisting, 'selectedDate:', selectedDate.value, 'existing assignments:', scheduleMap.value.get(selectedDate.value))
-    emit('assign', { payload, mode })
+    // Always use update mode to replace the assignment for the day
+    emit('assign', { payload, mode: 'update' })
     closeAssign()
   }
 
