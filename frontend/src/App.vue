@@ -5,6 +5,7 @@ import StaffTable from './components/StaffTable.vue'
 import ScheduleForm from './components/ScheduleForm.vue'
 import ScheduleTable from './components/ScheduleTable.vue'
 import StatsPage from './pages/StatsPage.vue'
+import CalendarPage from './pages/CalendarPage.vue'
 
 import type { NewStaff } from '@/types/staff'
 import type { NewSchedule } from '@/types/schedule'
@@ -75,5 +76,8 @@ const onUnassign = (date: string) =>
 
     <!-- Stats -->
     <StatsPage :staff="staffStore.staff" :refresh-key="scheduleStore.schedule.length" />
+
+    <!-- Calendar -->
+    <CalendarPage :staff="staffStore.staff" :schedule="scheduleStore.schedule" />
   </main>
 </template>
