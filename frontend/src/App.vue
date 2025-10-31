@@ -8,9 +8,13 @@ import StatsPage from './pages/StatsPage.vue'
 import type { NewStaff } from '@/types/staff'
 import type { NewSchedule } from '@/types/schedule'
 import { useDutyStore } from '@/stores/duty'
+import { useStaffStore } from '@/stores/staff'
+import { useScheduleStore } from '@/stores/schedule'
 import { log, errorMessage } from '@/utils/logger'
 
-const store = useDutyStore()
+const dutyStore = useDutyStore()
+const staffStore = useStaffStore()
+const scheduleStore = useScheduleStore()
 const loading = ref(false)
 const error = ref('')
 
@@ -18,7 +22,7 @@ async function refresh() {
   loading.value = true
   error.value = ''
   try {
-    await Promise.all([store.loadStaff(), store.loadSchedule(), store.loadStats()])
+    await Promise.all([staffStore.loadStaff(), scheduleStore.loadSchedule(), dutyStore.loadStats()])
   } catch (e) {
     const msg = errorMessage(e)
     log.error('Failed to load staff', e)
@@ -31,7 +35,7 @@ async function refresh() {
 async function onCreate(payload: NewStaff) {
   error.value = ''
   try {
-    await store.createStaff(payload)
+    await staffStore.createStaff(payload)
   } catch (e) {
     const msg = errorMessage(e)
     log.error('Failed to create staff', e)
@@ -42,7 +46,7 @@ async function onCreate(payload: NewStaff) {
 async function onDelete(id: number) {
   error.value = ''
   try {
-    await store.deleteStaff(id)
+    await staffStore.deleteStaff(id)
   } catch (e) {
     const msg = errorMessage(e)
     log.error('Failed to delete staff', e)
@@ -53,7 +57,7 @@ async function onDelete(id: number) {
 async function onAssign(payload: NewSchedule) {
   error.value = ''
   try {
-    await store.createSchedule(payload)
+    await scheduleStore.createSchedule(payload)
   } catch (e) {
     const msg = errorMessage(e)
     log.error('Failed to assign duty', e)
@@ -64,7 +68,7 @@ async function onAssign(payload: NewSchedule) {
 async function onUnassign(dateStr: string) {
   error.value = ''
   try {
-    await store.deleteScheduleByDate(dateStr)
+    await scheduleStore.deleteScheduleByDate(dateStr)
   } catch (e) {
     const msg = errorMessage(e)
     log.error('Failed to remove duty', e)
@@ -81,16 +85,16 @@ onMounted(refresh)
     <p v-if="error" class="text-red-600">{{ error }}</p>
     <p v-if="loading" class="text-gray-600">Loading…</p>
     <StaffForm @submit="onCreate" />
-    <StaffTable :items="store.staff" @delete="onDelete" />
+    <StaffTable :items="staffStore.staff" @delete="onDelete" />
 
     <section class="space-y-3">
       <h2 class="text-xl font-semibold">Duty Scheduling</h2>
-      <ScheduleForm :staff="store.staff" @submit="onAssign" />
-      <ScheduleTable :items="store.schedule" :staff="store.staff" @delete="onUnassign" />
+      <ScheduleForm :staff="staffStore.staff" @submit="onAssign" />
+      <ScheduleTable :items="scheduleStore.schedule" :staff="staffStore.staff" @delete="onUnassign" />
     </section>
 
     <section class="space-y-3">
-      <StatsPage :staff="store.staff" :refresh-key="store.schedule.length" />
+      <StatsPage :staff="staffStore.staff" :refresh-key="scheduleStore.schedule.length" />
     </section>
   </main>
   
