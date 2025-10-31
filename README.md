@@ -5,6 +5,6 @@
 
 ### Start Backend
 ```
-uv run python -m main
-
+cd backend
+uv run python -m app.main
 ```

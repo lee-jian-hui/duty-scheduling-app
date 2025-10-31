@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-from backend.models.schedule import ScheduleCreate, ScheduleRead
+from ..dto_models.schedule import ScheduleCreate, ScheduleRead
 
 
 
@@ -21,5 +21,3 @@ def list_schedule() -> List[ScheduleRead]:
 def assign_duty(payload: ScheduleCreate) -> ScheduleRead:
     # Skeleton: to be implemented by service layer
     raise HTTPException(status_code=501, detail="Not implemented: assign_duty service binding")
-
-

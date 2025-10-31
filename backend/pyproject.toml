@@ -8,6 +8,3 @@ dependencies = [
     "fastapi[standard]>=0.120.3",
 ]
 
-
-[tool.uv]
-venv = true

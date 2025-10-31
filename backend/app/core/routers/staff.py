@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field, conint
 
-from backend.models.staff import StaffCreate, StaffRead
+from ..dto_models.staff import StaffCreate, StaffRead
 
 
 
@@ -28,4 +28,3 @@ def add_staff(payload: StaffCreate) -> StaffRead:
 def delete_staff(staff_id: int) -> dict:
     # Skeleton: to be implemented by service layer
     raise HTTPException(status_code=501, detail="Not implemented: delete_staff service binding")
-
