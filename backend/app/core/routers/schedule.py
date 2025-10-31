@@ -1,6 +1,8 @@
 from typing import List
 
 from fastapi import APIRouter, HTTPException, Depends
+from fastapi.responses import StreamingResponse
+import io
 
 from ..dto_models.schedule import (
     ScheduleCreate,
@@ -54,6 +56,18 @@ def replace_duty(date: str, payload: ScheduleUpdateRequest, svc: ScheduleService
         if str(e) == "staff_not_found":
             raise HTTPException(status_code=400, detail="Staff not found")
         raise
+
+
+@router.get("/export")
+def export_schedule(svc: ScheduleService = Depends(get_schedule_service)) -> StreamingResponse:
+    data = svc.export_csv()
+    return StreamingResponse(
+        io.BytesIO(data),
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": 'attachment; filename="schedule.csv"'
+        },
+    )
 
 
 @router.post("/intelligent-schedule", response_model=List[ScheduleRead])

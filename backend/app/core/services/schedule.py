@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import List
 from datetime import datetime, date, timedelta
+import csv
+import io
 
 from ..models import DutySchedule
 from ..repositories import ScheduleRepository, StaffRepository
@@ -85,3 +87,17 @@ class ScheduleService:
             idx += 1
             day += timedelta(days=1)
         return out
+
+    def export_csv(self) -> bytes:
+        # Collect schedules ordered by date
+        items = sorted(self.schedule_repo.list(), key=lambda x: x.date)
+        buf = io.StringIO()
+        writer = csv.writer(buf)
+        writer.writerow(["date", "staff_id", "staff_name"])  # header
+        for it in items:
+            staff = self.staff_repo.get(it.staff_id)
+            name = staff.name if staff else ""
+            writer.writerow([it.date, it.staff_id, name])
+        data = buf.getvalue().encode("utf-8")
+        buf.close()
+        return data
