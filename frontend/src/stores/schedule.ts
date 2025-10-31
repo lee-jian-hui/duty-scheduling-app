@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { Schedule, NewSchedule } from '@/types/schedule'
-import { listSchedule, createSchedule as apiCreateSchedule, deleteScheduleByDate as apiDeleteScheduleByDate } from '@/api/scheduleApi'
+import { listSchedule, createSchedule as apiCreateSchedule, deleteScheduleByDate as apiDeleteScheduleByDate, replaceScheduleByDate as apiReplaceScheduleByDate } from '@/api/scheduleApi'
 import { useDutyStore } from './duty'
 
 export const useScheduleStore = defineStore('schedule', () => {
@@ -26,6 +26,15 @@ export const useScheduleStore = defineStore('schedule', () => {
     await duty.loadStats()
   }
 
-  return { schedule, loadSchedule, createSchedule, deleteScheduleByDate }
-})
+  async function replaceScheduleByDate(dateStr: string, staffId: number) {
+    const updated = await apiReplaceScheduleByDate(dateStr, staffId)
+    // Remove existing assignments for the date, then add the updated one
+    const day = dateStr
+    schedule.value = schedule.value.filter((x) => new Date(x.date).toISOString().slice(0, 10) !== day)
+    schedule.value = [...schedule.value, updated]
+    const duty = useDutyStore()
+    await duty.loadStats()
+  }
 
+  return { schedule, loadSchedule, createSchedule, deleteScheduleByDate, replaceScheduleByDate }
+})

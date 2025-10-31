@@ -30,8 +30,8 @@ class InMemoryScheduleRepository(ScheduleRepository):
         self._items: List[DutySchedule] = []
 
     def add(self, schedule: DutySchedule) -> DutySchedule:
-        # Ensure a staff member isn't assigned more than once on the same date
-        if any(item.date == schedule.date and item.staff_id == schedule.staff_id for item in self._items):
+        # Enforce single assignment per date globally
+        if any(item.date == schedule.date for item in self._items):
             raise ValueError("duplicate_assignment")
         self._items.append(schedule)
         return schedule

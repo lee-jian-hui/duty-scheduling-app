@@ -2,9 +2,10 @@ from typing import List
 
 from fastapi import APIRouter, HTTPException, Depends
 
-from ..dto_models.schedule import ScheduleCreate, ScheduleRead, ScheduleDeleteResponse
+from ..dto_models.schedule import ScheduleCreate, ScheduleDeleteResponse, ScheduleRead, ScheduleUpdateRequest
 from ..services import ScheduleService
 from app.deps import get_schedule_service
+
 
 router = APIRouter(prefix="/api/schedule", tags=["schedule"])
 
@@ -22,8 +23,8 @@ def assign_duty(payload: ScheduleCreate, svc: ScheduleService = Depends(get_sche
         if str(e) == "staff_not_found":
             raise HTTPException(status_code=400, detail="Staff not found")
         # Repo may raise error if date already assigned
-        if str(e) in {"duplicate_assignment"} or str(e).startswith("A duty is already assigned"):
-            raise HTTPException(status_code=409, detail="Staff already assigned for date")
+        if str(e).startswith("A duty is already assigned"):
+            raise HTTPException(status_code=409, detail="Duty already assigned for date")
         raise
 
 
@@ -36,3 +37,13 @@ def delete_duty(date: str, svc: ScheduleService = Depends(get_schedule_service))
         # For now, ignore missing entry and respond deleted True to keep idempotency
         pass
     return ScheduleDeleteResponse(deleted=True)
+
+
+@router.put("/{date}", response_model=ScheduleRead)
+def replace_duty(date: str, payload: ScheduleUpdateRequest, svc: ScheduleService = Depends(get_schedule_service)) -> ScheduleRead:
+    try:
+        return svc.replace_for_date(date, payload.staff_id)
+    except ValueError as e:
+        if str(e) == "staff_not_found":
+            raise HTTPException(status_code=400, detail="Staff not found")
+        raise

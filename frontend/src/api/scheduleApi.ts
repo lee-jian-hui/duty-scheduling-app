@@ -15,3 +15,8 @@ export async function deleteScheduleByDate(dateStr: string): Promise<{ deleted: 
   const { data } = await api.delete<{ deleted: boolean }>(`/api/schedule/${encodeURIComponent(dateStr)}`)
   return data
 }
+
+export async function replaceScheduleByDate(dateStr: string, staffId: number): Promise<Schedule> {
+  const { data } = await api.put<Schedule>(`/api/schedule/${encodeURIComponent(dateStr)}`, { staff_id: staffId })
+  return data
+}

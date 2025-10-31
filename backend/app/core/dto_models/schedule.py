@@ -45,3 +45,8 @@ class ScheduleListResponse(BaseModel):
 class ScheduleCreateResponse(ScheduleRead):
     """Response returned after creation (identical to ScheduleRead)."""
     message: str = "Schedule record created successfully"
+
+
+class ScheduleUpdateRequest(BaseModel):
+    """Payload to update/replace assignment for a given date."""
+    staff_id: int

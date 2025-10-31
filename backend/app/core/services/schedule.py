@@ -43,3 +43,16 @@ class ScheduleService:
 
     def delete_by_date(self, date_str: str) -> None:
         self.schedule_repo.delete_by_date(date_str)
+
+    def replace_for_date(self, date_str: str, staff_id: int) -> ScheduleRead:
+        # Validate staff exists
+        staff = self.staff_repo.get(staff_id)
+        if not staff:
+            raise ValueError("staff_not_found")
+
+        # Replace existing assignments for date with the new one
+        self.schedule_repo.delete_by_date(date_str)
+        entity = DutySchedule(date=date_str, staff_id=staff_id)
+        saved = self.schedule_repo.add(entity)
+        dt = datetime.fromisoformat(saved.date)
+        return ScheduleRead(id="", date=dt, staff_id=saved.staff_id)

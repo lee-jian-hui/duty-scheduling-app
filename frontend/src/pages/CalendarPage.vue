@@ -8,7 +8,10 @@
   import ScheduleForm from '@/components/ScheduleForm.vue'
 
   const props = defineProps<{ staff: Staff[]; schedule: Schedule[] }>()
-  const emit = defineEmits<{ (e: 'assign', payload: NewSchedule): void }>()
+  const emit = defineEmits<{
+    (e: 'assign', payload: { payload: NewSchedule; mode: 'create' | 'update' }): void
+    (e: 'delete-date', date: string): void
+  }>()
 
   const today = new Date()
   const year = ref(today.getUTCFullYear())
@@ -75,7 +78,21 @@
     showAssign.value = false
   }
   function onAssign(payload: NewSchedule) {
-    emit('assign', payload)
+    // Determine if there are existing assignments for this date; if so, send update
+    const hasExisting = (scheduleMap.value.get(selectedDate.value)?.length || 0) > 0
+    const mode = hasExisting ? 'update' : 'create'
+    console.log('onAssign mode:', mode, 'hasExisting:', hasExisting, 'selectedDate:', selectedDate.value, 'existing assignments:', scheduleMap.value.get(selectedDate.value))
+    emit('assign', { payload, mode })
+    closeAssign()
+  }
+
+  const hasExistingForSelected = computed(() => {
+    const arr = scheduleMap.value.get(selectedDate.value)
+    return !!arr && arr.length > 0
+  })
+
+  function onDeleteDate() {
+    emit('delete-date', selectedDate.value)
     closeAssign()
   }
 </script>
@@ -132,6 +149,14 @@
           :lock-date="true"
           @submit="onAssign"
         />
+        <div v-if="hasExistingForSelected" class="px-4 pb-4">
+          <button
+            class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+            @click="onDeleteDate"
+          >
+            Delete assignments for this date
+          </button>
+        </div>
       </div>
     </div>
   </section>

@@ -50,6 +50,22 @@ const onAssign = (payload: NewSchedule) =>
 
 const onUnassign = (date: string) =>
   run(() => scheduleStore.deleteScheduleByDate(date))
+
+const onAssignFromCalendar = (evt: { payload: NewSchedule; mode: 'create' | 'update' }) =>
+  run(async () => {
+    const yyyyMmDd = evt.payload.date.slice(0, 10)
+    if (evt.mode === 'update') {
+      await scheduleStore.replaceScheduleByDate(yyyyMmDd, evt.payload.staff_id)
+    } else {
+      await scheduleStore.createSchedule(evt.payload)
+    }
+  }, {
+    mapError: (e) => {
+      const status = httpStatus(e)
+      if (status === 409) return httpDetail(e) || 'Staff already assigned for this date'
+      return errorMessage(e)
+    },
+  })
 </script>
 
 <template>
@@ -75,7 +91,12 @@ const onUnassign = (date: string) =>
     </section> -->
 
     <!-- Calendar -->
-    <CalendarPage :staff="staffStore.staff" :schedule="scheduleStore.schedule" @assign="onAssign" />
+    <CalendarPage
+      :staff="staffStore.staff"
+      :schedule="scheduleStore.schedule"
+      @assign="onAssignFromCalendar"
+      @delete-date="onUnassign"
+    />
     <!-- Stats -->
     <StatsPage :staff="staffStore.staff" :refresh-key="scheduleStore.schedule.length" />
 
