@@ -34,6 +34,7 @@ export async function generateIntelligentSchedule(
 ): Promise<Schedule[]> {
   const payload = { start_date: toIsoDateTime(start), end_date: toIsoDateTime(end) }
   const { data } = await api.post<Schedule[]>('/api/schedule/intelligent-schedule', payload)
+  console.log("generating intelligent schedule")
   return data
 }
 

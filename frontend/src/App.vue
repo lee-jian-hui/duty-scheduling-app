@@ -96,6 +96,8 @@ const onAssignFromCalendar = (evt: { payload: NewSchedule; mode: 'create' | 'upd
       :schedule="scheduleStore.schedule"
       @assign="onAssignFromCalendar"
       @delete-date="onUnassign"
+      @generate="({ start, end }) => run(() => scheduleStore.generateIntelligentRange(start, end))"
+      @wipe-all="() => run(() => scheduleStore.wipeAll())"
     />
     <!-- Stats -->
     <StatsPage :staff="staffStore.staff" />

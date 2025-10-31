@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { Schedule, NewSchedule } from '@/types/schedule'
-import { listSchedule, createSchedule as apiCreateSchedule, deleteScheduleByDate as apiDeleteScheduleByDate, replaceScheduleByDate as apiReplaceScheduleByDate } from '@/api/scheduleApi'
+import { listSchedule, createSchedule as apiCreateSchedule, deleteScheduleByDate as apiDeleteScheduleByDate, replaceScheduleByDate as apiReplaceScheduleByDate, generateIntelligentSchedule as apiGenerateIntelligentSchedule, wipeAllSchedules as apiWipeAllSchedules } from '@/api/scheduleApi'
 import { useDutyStore } from './duty'
 import { dateKeyFromISO } from '@/utils/date'
 
@@ -40,5 +40,20 @@ export const useScheduleStore = defineStore('schedule', () => {
     await duty.loadStats()
   }
 
-  return { schedule, loadSchedule, createSchedule, deleteScheduleByDate, replaceScheduleByDate }
+  async function generateIntelligentRange(start: string, end: string) {
+    await apiGenerateIntelligentSchedule(start, end)
+    // Reload full schedule to reflect changes across the range
+    schedule.value = await listSchedule()
+    const duty = useDutyStore()
+    await duty.loadStats()
+  }
+
+  async function wipeAll() {
+    await apiWipeAllSchedules()
+    schedule.value = []
+    const duty = useDutyStore()
+    await duty.loadStats()
+  }
+
+  return { schedule, loadSchedule, createSchedule, deleteScheduleByDate, replaceScheduleByDate, generateIntelligentRange, wipeAll }
 })

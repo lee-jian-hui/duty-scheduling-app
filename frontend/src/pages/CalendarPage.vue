@@ -4,7 +4,7 @@
   import { computed, ref } from 'vue'
   import type { Staff } from '@/types/staff'
   import type { Schedule, NewSchedule } from '@/types/schedule'
-  import { getMonthMatrix, formatISODate } from '@/utils/date'
+  import { getMonthMatrix, formatISODate, daysInMonth } from '@/utils/date'
   import ScheduleForm from '@/components/ScheduleForm.vue'
 
   const props = defineProps<{ staff: Staff[]; schedule: Schedule[] }>()
@@ -16,16 +16,20 @@
   const today = new Date()
   const year = ref(today.getUTCFullYear())
   const month = ref(today.getUTCMonth()) // 0-based
+  const startDate = ref<string>('')
+  const endDate = ref<string>('')
 
   function nextMonth() {
     const d = new Date(Date.UTC(year.value, month.value + 1, 1))
     year.value = d.getUTCFullYear()
     month.value = d.getUTCMonth()
+    setDefaultRange()
   }
   function prevMonth() {
     const d = new Date(Date.UTC(year.value, month.value - 1, 1))
     year.value = d.getUTCFullYear()
     month.value = d.getUTCMonth()
+    setDefaultRange()
   }
 
   const monthLabel = computed(() => {
@@ -35,6 +39,17 @@
       timeZone: 'UTC',
     })
   })
+
+  function setDefaultRange() {
+    const y = year.value
+    const m = month.value + 1 // human month
+    const first = `${y}-${String(m).padStart(2, '0')}-01`
+    const lastDay = daysInMonth(y, month.value)
+    const last = `${y}-${String(m).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`
+    startDate.value = first
+    endDate.value = last
+  }
+  setDefaultRange()
 
   const scheduleMap = computed(() => {
     // Map YYYY-MM-DD -> array of staff names
@@ -92,10 +107,38 @@
     emit('delete-date', selectedDate.value)
     closeAssign()
   }
+
+  function onGenerate() {
+    if (!startDate.value || !endDate.value) return
+    emit('generate', { start: startDate.value, end: endDate.value })
+  }
+
+  function onWipeAll() {
+    emit('wipe-all')
+  }
 </script>
 
 <template>
   <section class="space-y-3 p-2">
+    <!-- Intelligent schedule controls -->
+    <div class="flex flex-wrap items-end gap-3">
+      <div>
+        <label class="block text-sm text-gray-700">Start date</label>
+        <input v-model="startDate" type="date" class="border rounded px-2 py-1" />
+      </div>
+      <div>
+        <label class="block text-sm text-gray-700">End date</label>
+        <input v-model="endDate" type="date" class="border rounded px-2 py-1" />
+      </div>
+      <div class="flex gap-2">
+        <button class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700" @click="onGenerate">
+          Generate Round Robin
+        </button>
+        <button class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700" @click="onWipeAll">
+          Wipe All
+        </button>
+      </div>
+    </div>
     <div class="flex items-center justify-between">
       <h2 class="text-xl font-semibold">Duty Calendar</h2>
       <div class="flex items-center gap-2">
