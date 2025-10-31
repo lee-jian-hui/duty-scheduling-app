@@ -3,14 +3,9 @@ from typing import List
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-
-class ScheduleCreate(BaseModel):
-    date: str = Field(..., regex=r"^\d{4}-\d{2}-\d{2}$")
-    staff_id: int
+from backend.models.schedule import ScheduleCreate, ScheduleRead
 
 
-class ScheduleRead(ScheduleCreate):
-    pass
 
 
 router = APIRouter(prefix="/api/schedule", tags=["schedule"])

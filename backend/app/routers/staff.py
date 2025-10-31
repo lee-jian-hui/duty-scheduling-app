@@ -3,15 +3,10 @@ from typing import List
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field, conint
 
-
-class StaffCreate(BaseModel):
-    name: str = Field(..., min_length=1)
-    age: conint(ge=16, le=80)  # type: ignore[valid-type]
-    position: str = Field(..., min_length=1)
+from backend.models.staff import StaffCreate, StaffRead
 
 
-class StaffRead(StaffCreate):
-    id: int
+
 
 
 router = APIRouter(prefix="/api/staff", tags=["staff"])
