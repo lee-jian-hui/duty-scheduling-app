@@ -2,13 +2,9 @@ from typing import List
 
 from fastapi import APIRouter, HTTPException, Depends
 
-from ..dto_models.schedule import ScheduleCreate, ScheduleRead
+from ..dto_models.schedule import ScheduleCreate, ScheduleRead, ScheduleDeleteResponse
 from ..services import ScheduleService
 from app.deps import get_schedule_service
-
-" 200 OK
-INFO:     127.0.0.1:36754 - "DELETE /api/schedule/2025-10-31 HTTP/1.1" 404 Not Found
-
 
 router = APIRouter(prefix="/api/schedule", tags=["schedule"])
 
@@ -29,3 +25,14 @@ def assign_duty(payload: ScheduleCreate, svc: ScheduleService = Depends(get_sche
         if str(e).startswith("A duty is already assigned"):
             raise HTTPException(status_code=409, detail="Duty already assigned for date")
         raise
+
+
+@router.delete("/{date}", response_model=ScheduleDeleteResponse)
+def delete_duty(date: str, svc: ScheduleService = Depends(get_schedule_service)) -> ScheduleDeleteResponse:
+    # Expecting date in YYYY-MM-DD format
+    try:
+        svc.delete_by_date(date)
+    except Exception:
+        # For now, ignore missing entry and respond deleted True to keep idempotency
+        pass
+    return ScheduleDeleteResponse(deleted=True)
