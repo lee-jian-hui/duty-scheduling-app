@@ -15,3 +15,6 @@ Scheduler Calendar
 - schedule export to csv
 ![alt text](images/exportcsv1.png)
 ![alt text](images/exportcsv2.png)
+
+## Backend Architecture
+![alt text](images/arch.png)
