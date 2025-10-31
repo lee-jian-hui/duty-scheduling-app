@@ -245,8 +245,15 @@ __marimo__/
 
 
 
+
+# whitelist
+!**/README.md
+!ARCHITECTURE.md
+
 # Others
-REQS.md
-BACKEND_REQS.md
-FRONTEND_REQS.md
+*.md
 *.db
+
+
+
+

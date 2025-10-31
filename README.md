@@ -1,5 +1,8 @@
 ## PRE-REQUISITES
-
+- Node.js
+- NPM
+- python pip
+- uv `pip install uv`
 
 
 #### Setup DB
@@ -50,3 +53,4 @@ alembic upgrade head
 Notes:
 
 - The app still uses in-memory repositories by default. You can add DB-backed repositories later and inject them via `app/deps.py`.
+
