@@ -8,3 +8,38 @@
 cd backend
 uv run python -m app.main
 ```
+
+alembic migrations
+```
+cd backend/app
+alembic history
+```
+
+### Database & Alembic (SQLite)
+
+This repo includes a minimal SQLAlchemy + Alembic setup using SQLite.
+
+- Connection URL: `DATABASE_URL` (defaults to `sqlite:///backend/app/app.db`)
+- SQLAlchemy base/session: `app/db.py`
+- ORM models for migrations: `app/core/db_models/*`
+- Alembic setup: `alembic.ini`, `alembic/`, with an initial migration
+
+Setup steps:
+
+1) Install dependencies in the backend venv
+
+```
+pip install sqlalchemy alembic
+```
+
+2) Run migrations from the repo root
+
+```
+alembic upgrade head
+```
+
+3) Optional: customize the `DATABASE_URL` env var and re-run migrations.
+
+Notes:
+
+- The app still uses in-memory repositories by default. You can add DB-backed repositories later and inject them via `app/deps.py`.
