@@ -42,3 +42,8 @@ export async function wipeAllSchedules(): Promise<{ deleted: boolean }> {
   const { data } = await api.delete<{ deleted: boolean }>('/api/schedule')
   return data
 }
+
+export async function fetchScheduleCsv(): Promise<Blob> {
+  const resp = await api.get('/api/schedule/export', { responseType: 'blob' })
+  return resp.data as Blob
+}

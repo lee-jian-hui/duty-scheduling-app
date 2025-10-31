@@ -137,6 +137,9 @@
         <button class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700" @click="onWipeAll">
           Wipe All
         </button>
+        <button class="bg-gray-700 text-white px-3 py-1 rounded hover:bg-gray-800" @click="$emit('export')">
+          Export CSV
+        </button>
       </div>
     </div>
     <div class="flex items-center justify-between">

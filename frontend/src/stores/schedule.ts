@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { Schedule, NewSchedule } from '@/types/schedule'
-import { listSchedule, createSchedule as apiCreateSchedule, deleteScheduleByDate as apiDeleteScheduleByDate, replaceScheduleByDate as apiReplaceScheduleByDate, generateIntelligentSchedule as apiGenerateIntelligentSchedule, wipeAllSchedules as apiWipeAllSchedules } from '@/api/scheduleApi'
+import { listSchedule, createSchedule as apiCreateSchedule, deleteScheduleByDate as apiDeleteScheduleByDate, replaceScheduleByDate as apiReplaceScheduleByDate, generateIntelligentSchedule as apiGenerateIntelligentSchedule, wipeAllSchedules as apiWipeAllSchedules, fetchScheduleCsv } from '@/api/scheduleApi'
+import { saveBlob } from '@/utils/download'
 import { useDutyStore } from './duty'
 import { dateKeyFromISO } from '@/utils/date'
 
@@ -55,5 +56,10 @@ export const useScheduleStore = defineStore('schedule', () => {
     await duty.loadStats()
   }
 
-  return { schedule, loadSchedule, createSchedule, deleteScheduleByDate, replaceScheduleByDate, generateIntelligentRange, wipeAll }
+  async function exportCsv(filename = 'schedule.csv') {
+    const blob = await fetchScheduleCsv()
+    saveBlob(blob, filename)
+  }
+
+  return { schedule, loadSchedule, createSchedule, deleteScheduleByDate, replaceScheduleByDate, generateIntelligentRange, wipeAll, exportCsv }
 })
