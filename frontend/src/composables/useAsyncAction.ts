@@ -5,13 +5,13 @@ export function useAsyncAction() {
   const loading = ref(false)
   const error = ref('')
 
-  async function run(action: () => Promise<void>) {
+  async function run(action: () => Promise<void>, opts?: { mapError?: (e: unknown) => string }) {
     loading.value = true
     error.value = ''
     try {
       await action()
     } catch (e) {
-      error.value = errorMessage(e)
+      error.value = opts?.mapError ? opts.mapError(e) : errorMessage(e)
     } finally {
       loading.value = false
     }
@@ -19,4 +19,3 @@ export function useAsyncAction() {
 
   return { loading, error, run }
 }
-

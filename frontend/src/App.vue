@@ -14,6 +14,8 @@ import { useStaffStore } from '@/stores/staff'
 import { useScheduleStore } from '@/stores/schedule'
 import { useAppInit } from '@/composables/useAppInit'
 import { useAsyncAction } from '@/composables/useAsyncAction'
+import { httpStatus, httpDetail } from '@/utils/http'
+import { errorMessage } from '@/utils/logger'
 
 const staffStore = useStaffStore()
 const scheduleStore = useScheduleStore()
@@ -25,13 +27,25 @@ const { loading, error, run } = useAsyncAction()
 onMounted(() => run(init))
 
 const onCreate = (payload: NewStaff) =>
-  run(() => staffStore.createStaff(payload))
+  run(() => staffStore.createStaff(payload), {
+    mapError: (e) => {
+      const status = httpStatus(e)
+      if (status === 409) return httpDetail(e) || 'Staff name already exists'
+      return errorMessage(e)
+    },
+  })
 
 const onDelete = (id: number) =>
   run(() => staffStore.deleteStaff(id))
 
 const onAssign = (payload: NewSchedule) =>
-  run(() => scheduleStore.createSchedule(payload))
+  run(() => scheduleStore.createSchedule(payload), {
+    mapError: (e) => {
+      const status = httpStatus(e)
+      if (status === 409) return httpDetail(e) || 'Staff already assigned for this date'
+      return errorMessage(e)
+    },
+  })
 
 const onUnassign = (date: string) =>
   run(() => scheduleStore.deleteScheduleByDate(date))
