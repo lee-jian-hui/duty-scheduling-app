@@ -22,8 +22,8 @@ def assign_duty(payload: ScheduleCreate, svc: ScheduleService = Depends(get_sche
         if str(e) == "staff_not_found":
             raise HTTPException(status_code=400, detail="Staff not found")
         # Repo may raise error if date already assigned
-        if str(e).startswith("A duty is already assigned"):
-            raise HTTPException(status_code=409, detail="Duty already assigned for date")
+        if str(e) in {"duplicate_assignment"} or str(e).startswith("A duty is already assigned"):
+            raise HTTPException(status_code=409, detail="Staff already assigned for date")
         raise
 
 

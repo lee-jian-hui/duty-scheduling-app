@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import List
 
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -30,9 +30,9 @@ class InMemoryScheduleRepository(ScheduleRepository):
         self._items: List[DutySchedule] = []
 
     def add(self, schedule: DutySchedule) -> DutySchedule:
-        # Ensure only one assignment per date
-        if any(item.date == schedule.date for item in self._items):
-            raise ValueError("A duty is already assigned for this date")
+        # Ensure a staff member isn't assigned more than once on the same date
+        if any(item.date == schedule.date and item.staff_id == schedule.staff_id for item in self._items):
+            raise ValueError("duplicate_assignment")
         self._items.append(schedule)
         return schedule
 
@@ -54,8 +54,8 @@ class SQLAlchemyScheduleRepository(ScheduleRepository):
             self.session.commit()
         except IntegrityError:
             self.session.rollback()
-            # Keep message consistent with InMemory repo to preserve handlers
-            raise ValueError("A duty is already assigned for this date")
+            # Duplicate assignment for the same (date, staff_id)
+            raise ValueError("duplicate_assignment")
         return DutySchedule(date=row.date, staff_id=row.staff_id)
 
     def list(self) -> List[DutySchedule]:
@@ -63,8 +63,6 @@ class SQLAlchemyScheduleRepository(ScheduleRepository):
         return [DutySchedule(date=r.date, staff_id=r.staff_id) for r in rows]
 
     def delete_by_date(self, date_str: str) -> None:
-        obj = self.session.get(DutyScheduleORM, date_str)
-        if obj is None:
-            return
-        self.session.delete(obj)
+        # Delete all assignments on the given date
+        self.session.execute(delete(DutyScheduleORM).where(DutyScheduleORM.date == date_str))
         self.session.commit()

@@ -35,6 +35,8 @@ class ScheduleService:
         # Convert date to YYYY-MM-DD string
         date_str = payload.date.date().isoformat()
 
+        
+
         entity = DutySchedule(date=date_str, staff_id=payload.staff_id)
         saved = self.schedule_repo.add(entity)
         return ScheduleRead(id=payload.id, date=payload.date, staff_id=saved.staff_id)
