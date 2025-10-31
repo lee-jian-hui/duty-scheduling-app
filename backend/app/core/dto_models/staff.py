@@ -4,10 +4,15 @@ from pydantic import BaseModel, Field, conint
 from datetime import datetime
 from typing import Optional, List
 
-# base DTO
+"""Pydantic DTOs for Staff entities.
+
+Domain model (core/models/staff.py) has fields: id:int, name:str, age:int, position:str.
+DTOs mirror that, with create/update excluding id and read including id.
+"""
+
+
+# base DTO (shared fields, no id)
 class StaffBase(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid4()), description="Unique staff ID (UUID4)")
-    date: datetime = Field(..., description="Duty date (YYYY-MM-DD)")
     name: str = Field(..., min_length=1, description="Staff full name")
     age: conint(ge=16, le=80)  # type: ignore[valid-type]
     position: str = Field(..., min_length=1, description="Job position title")
@@ -30,7 +35,7 @@ class StaffUpdate(StaffBase):
 
 class StaffRead(StaffBase):
     """Represents staff data returned by the API."""
-    pass
+    id: int
 
 class StaffDeleteResponse(BaseModel):
     """Response returned after successful deletion."""

@@ -1,12 +1,7 @@
 from typing import List
 
 from fastapi import APIRouter
-from pydantic import BaseModel
-
-
-class StatisticRead(BaseModel):
-    staff_id: int
-    count: int
+from ..dto_models.statistics import StatisticRead
 
 
 router = APIRouter(prefix="/api/statistics", tags=["statistics"])
@@ -16,4 +11,3 @@ router = APIRouter(prefix="/api/statistics", tags=["statistics"])
 def duty_counts() -> List[StatisticRead]:
     # Skeleton: to be implemented by service layer
     return []
-
