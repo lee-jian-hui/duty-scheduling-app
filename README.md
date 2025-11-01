@@ -23,3 +23,4 @@ Scheduler Calendar
 
 ## Known Bugs / Issues / Improvements
 - no loading modal on frontend to prevent db lock contention operations causing race conditions without user's knowledge
+- Setup docker compose orchestration flows
