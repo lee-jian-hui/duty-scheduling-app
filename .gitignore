@@ -198,6 +198,12 @@ venv.bak/
 # mypy
 .mypy_cache/
 .dmypy.json
+
+# SQLite (WAL mode creates sidecar files)
+*.db-wal
+*.db-shm
+*-wal
+*-shm
 dmypy.json
 
 # Pyre type checker
@@ -247,7 +253,7 @@ __marimo__/
 # Others
 *.md
 *.db
-
+*.db*
 
 # whitelist
 !**/README.md

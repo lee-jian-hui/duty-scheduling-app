@@ -18,3 +18,8 @@ Scheduler Calendar
 
 ## Backend Architecture
 ![alt text](images/arch.png)
+
+
+
+## Known Bugs / Issues / Improvements
+- no loading modal on frontend to prevent db lock contention operations causing race conditions without user's knowledge

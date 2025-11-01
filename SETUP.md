@@ -19,9 +19,11 @@
 
 #### Setup SQLLITE DB (MUST DO THIS FIRST)
 ```
+cd backend
+uv sync
 cd backend/app
-alembic history
-alembic upgrade head
+uv run alembic history
+uv run alembic upgrade head
 ```
 
 ### Start Backend
